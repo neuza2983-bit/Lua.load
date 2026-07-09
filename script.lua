@@ -1,26 +1,23 @@
--- COMBO SUPREMO V2: ESP COMPLETO + SEGUIDOR DE LINHA + FPS MÁXIMO
+-- COMBO SUPREMO REVISADO: ESP COMPLETO + FPS MÁXIMO (SEM TRAVAMENTOS)
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
 
 -- CONFIGURAÇÕES DE PERFORMANCE E JOGABILIDADE
 local VELOCIDADE_DISCRETA = 20
-local INTERVALO_LOOP = 0.5 -- Reação mais rápida para o ESP acompanhar o movimento real
+local INTERVALO_LOOP = 0.5 
 local DISTANCIA_MAXIMA_RENDERING = 300 
 
 _G.RealmeC3_ESP = true
 
--- Função para aplicar a velocidade de forma leve
+-- Função para aplicar a velocidade de forma leve e segura
 local function AplicarVelocidade(char)
     if not char then return end
-    local humanoid = char:WaitForChild("Humanoid", 5)
+    local humanoid = char:WaitForChild("Humanoid", 7)
     if humanoid then
         humanoid.WalkSpeed = VELOCIDADE_DISCRETA
     end
@@ -29,11 +26,7 @@ end
 if LocalPlayer.Character then AplicarVelocidade(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(AplicarVelocidade)
 
-LocalPlayer:GetPropertyChangedSignal("Team"):Connect(function()
-    if LocalPlayer.Character then AplicarVelocidade(LocalPlayer.Character) end
-end)
-
--- 1. GRÁFICOS MÍNIMOS (MODO LISO)
+-- 1. GRÁFICOS MÍNIMOS (MODO LISO PARA REALME C3)
 settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 setfpscap(120)
 
@@ -72,22 +65,9 @@ task.spawn(function()
     while task.wait(1) do LimparFiltrosEBugs() end
 end)
 
--- 3. REAÇÃO DE TOQUE ULTRA RÁPIDA
-local processandoClique = false
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if gameProcessedEvent then return end
-    if (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1) and not processandoClique then
-        processandoClique = true
-        VirtualInputManager:SendMouseButtonEvent(input.Position.X, input.Position.Y, 0, true, game, 0)
-        VirtualInputManager:SendMouseButtonEvent(input.Position.X, input.Position.Y, 0, false, game, 0)
-        task.wait()
-        processandoClique = false
-    end
-end)
-
 if Terrain then Terrain.WaterTransparency = 1 end
 
--- 4. SISTEMA DE ESP MELHORADO (NOME + DISTÂNCIA + LINHA ATÉ O JOGADOR)
+-- 3. SISTEMA DE ESP COMPLETO (NOME + DISTÂNCIA + LINHA)
 local function ObterEquipe(player)
     if not player or not player.Parent then return Color3.fromRGB(255, 255, 255), "JOGADOR" end
     local team = player.Team
@@ -111,7 +91,6 @@ local function MonitorarJogador(player)
     local function IniciarLoopESP(char)
         if not char then return end
         
-        -- Cria a linha usando LineHandleAdornment (Super leve para celular)
         local linha = Instance.new("LineHandleAdornment")
         linha.Name = "C3_Linha"
         linha.Length = 0
@@ -135,12 +114,10 @@ local function MonitorarJogador(player)
                         if dist <= DISTANCIA_MAXIMA_RENDERING then
                             local corTime, tipo = ObterEquipe(player)
                             
-                            -- Configura a Linha Guia
                             linha.Color3 = corTime
                             linha.Adornee = meuRoot
                             linha.Target = root
 
-                            -- Configura a Tag de Nome
                             local label
                             if not tag then
                                 tag = Instance.new("BillboardGui")
@@ -180,6 +157,13 @@ local function MonitorarJogador(player)
 
     if player.Character then IniciarLoopESP(player.Character) end
     player.CharacterAdded:Connect(IniciarLoopESP)
+end
+
+for _, p in ipairs(Players:GetPlayers()) do MonitorarJogador(p) end
+Players.PlayerAdded:Connect(MonitorarJogador)
+
+print("[Sucesso] Script Atualizado! Movimento corrigido e ESP ativo.")
+player.CharacterAdded:Connect(IniciarLoopESP)
 end
 
 for _, p in ipairs(Players:GetPlayers()) do MonitorarJogador(p) end
