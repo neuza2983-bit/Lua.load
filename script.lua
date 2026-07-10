@@ -1,17 +1,17 @@
--- ESP PREMIUM TOTALMENTE OTIMIZADO PARA REALME C3 (SEM TRAVAMENTO DE MOVIMENTO)
+-- OTIMIZAÇÃO SUPREMA DEFINITIVA V3 (MÁXIMO FPS / REALME C3 / BLOX FRUITS)
 if not game:IsLoaded() then game.Loaded:Wait() end
-if _G.RealmeC3_ESP then return end
-_G.RealmeC3_ESP = true
 
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- CONFIGURAÇÕES DE PERFORMANCE PERFEITAS
+-- CONFIGURAÇÕES MÁXIMAS DE PERFORMANCE
 local VELOCIDADE_DISCRETA = 20
-local INTERVALO_LOOP = 0.5 -- Atualiza mais rápido sem dar lag
-local DISTANCIA_MAXIMA_RENDERING = 250 -- Esconde tags longe para dar FPS
+local DISTANCIA_RENDER_MAPA = 250 -- Reduzido para dar ainda mais FPS no Helio G70
 
--- Aplica velocidade de forma leve e segura
+-- Gerenciador leve de movimentação
 local function AplicarVelocidade(char)
     if not char then return end
     local humanoid = char:WaitForChild("Humanoid", 5)
@@ -23,133 +23,109 @@ end
 if LocalPlayer.Character then AplicarVelocidade(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(AplicarVelocidade)
 
--- Detecta as equipes do Pinte ou Busque com precisão
-local function ObterEquipe(player)
-    if not player or not player.Parent then 
-        return Color3.fromRGB(255, 255, 255), "JOGADOR" 
+task.spawn(function()
+    while task.wait(1.5) do
+        if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid and humanoid.WalkSpeed ~= VELOCIDADE_DISCRETA then
+                humanoid.WalkSpeed = VELOCIDADE_DISCRETA
+            end
+        end
     end
-    
-    local team = player.Team
-    if not team then 
-        return Color3.fromRGB(255, 255, 255), "JOGADOR" 
-    end
+end)
 
-    local tName = string.lower(team.Name or "")
-    local tColor = team.TeamColor and team.TeamColor.Color
+-- 1. FORÇAR CONFIGURAÇÃO GRÁFICA INTERNA AO MÍNIMO
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+setfpscap(120)
 
-    if string.find(tName, "seek") or string.find(tName, "busc") or string.find(tName, "caça") or string.find(tName, "pega") or string.find(tName, "red") or string.find(tName, "pegador") or string.find(tName, "paint") or (tColor and tColor.R > 0.6 and tColor.B < 0.4) then
-        return Color3.fromRGB(255, 30, 30), "⚠️ CAÇADOR"
+-- 2. LIMPEZA TOTAL DE TEXTURAS, ANIMAÇÕES E EFEITOS DE SKILLS
+local function OtimizarObjeto(obj)
+    if obj:IsA("Texture") or obj:IsA("Decal") or obj:IsA("Sky") then
+        obj:Destroy()
+    elseif obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("CornerWedgePart") or obj:IsA("WedgePart") then
+        obj.Material = Enum.Material.SmoothPlastic
+        obj.Reflectance = 0
+        obj.CastShadow = false
+    elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Sparkles") or obj:IsA("Fire") then
+        obj.Enabled = false
+    elseif obj:IsA("Explosion") then
+        obj.Visible = false
+    elseif obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+        obj:Destroy()
     end
-    
-    if string.find(tName, "hider") or string.find(tName, "escond") or string.find(tName, "blue") or string.find(tName, "pinte") or (tColor and tColor.B > 0.6 and tColor.R < 0.4) then
-        return Color3.fromRGB(0, 160, 255), "🛡️ ESCONDIDO"
-    end
-    
-    if tColor then
-        return tColor, string.upper(team.Name or "JOGADOR")
-    end
-    
-    return Color3.fromRGB(255, 255, 255), "JOGADOR"
 end
 
--- Rastreamento ativo e leve de jogadores
-local function MonitorarJogador(player)
-    if player == LocalPlayer then return end
+for _, obj in ipairs(Workspace:GetDescendants()) do pcall(OtimizarObjeto) end
+Workspace.DescendantAdded:Connect(function(obj) pcall(OtimizarObjeto) end)
 
-    local conexaoCharacter
-    local conexaoTime
-
-    local function IniciarLoopESP(char)
-        if not char then return end
+-- 3. DESTRUTOR DE SOMBRAS, NEBLINA E LIXO DA CÂMERA
+local function LimparFiltrosEBugs()
+    if Lighting then
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 9e9
+        Lighting.Brightness = 1
         
-        local tagAntiga = char:FindFirstChild("C3_Tag")
-        if tagAntiga then tagAntiga:Destroy() end
+        for _, efeito in ipairs(Lighting:GetChildren()) do
+            if efeito:IsA("BlurEffect") or efeito:IsA("SunRaysEffect") or efeito:IsA("BloomEffect") or efeito:IsA("DepthOfFieldEffect") or efeito:IsA("ColorCorrectionEffect") then
+                efeito:Destroy()
+            end
+        end
+    end
 
-        task.spawn(function()
-            while _G.RealmeC3_ESP and player and player.Parent and char and char.Parent do
-                local meuChar = LocalPlayer.Character
-                if meuChar then
-                    local head = char:FindFirstChild("Head")
-                    local root = char:FindFirstChild("HumanoidRootPart")
-                    local meuRoot = meuChar:FindFirstChild("HumanoidRootPart")
+    if Workspace.CurrentCamera then
+        for _, v in ipairs(Workspace.CurrentCamera:GetChildren()) do
+            if not v:IsA("Camera") then v:Destroy() end
+        end
+    end
+end
 
-                    local meuHumanoid = meuChar:FindFirstChildOfClass("Humanoid")
-                    if meuHumanoid and meuHumanoid.WalkSpeed ~= VELOCIDADE_DISCRETA then
-                        meuHumanoid.WalkSpeed = VELOCIDADE_DISCRETA
-                    end
+LimparFiltrosEBugs()
+task.spawn(function()
+    while task.wait(0.5) do LimparFiltrosEBugs() end
+end)
 
-                    if head and root and meuRoot then
-                        local dist = math.floor((meuRoot.Position - root.Position).Magnitude)
-                        local tag = head:FindFirstChild("C3_Tag")
-
-                        if dist <= DISTANCIA_MAXIMA_RENDERING then
-                            local corTime, tipo = ObterEquipe(player)
-                            local label
-
-                            if not tag then
-                                tag = Instance.new("BillboardGui")
-                                label = Instance.new("TextLabel")
-
-                                tag.Name = "C3_Tag"
-                                tag.Parent = head
-                                tag.AlwaysOnTop = true
-                                tag.Size = UDim2.new(0, 110, 0, 25)
-                                tag.StudsOffset = Vector3.new(0, 3, 0)
-
-                                label.Name = "Texto"
-                                label.Parent = tag
-                                label.BackgroundTransparency = 1
-                                label.Size = UDim2.new(1, 0, 1, 0)
-                                label.TextSize = 10
-                                label.TextStrokeTransparency = 0.3
-                                label.Font = Enum.Font.SourceSansBold
-                            else
-                                label = tag:FindFirstChild("Texto")
-                            end
-
-                            if label then
-                                label.Text = string.format("%s\n%s [%dm]", player.Name, tipo, dist)
-                                label.TextColor3 = corTime
-                            end
-                        else
-                            if tag then tag:Destroy() end
+-- 4. RENDERIZADOR DINÂMICO DE MAPA (SISTEMA INTELIGENTE DE ANTILAG)
+task.spawn(function()
+    while task.wait(2) do
+        local meuChar = LocalPlayer.Character
+        local meuRoot = meuChar and meuChar:FindFirstChild("HumanoidRootPart")
+        
+        if meuRoot then
+            for _, obj in ipairs(Workspace:GetChildren()) do
+                if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) and obj.Name ~= LocalPlayer.Name and obj.Name ~= "Nevermore" then
+                    local basePart = obj:FindFirstChildOfClass("BasePart") or obj:FindFirstChildWhichIsA("BasePart", true)
+                    if basePart then
+                        local distancia = (meuRoot.Position - basePart.Position).Magnitude
+                        if distancia > DISTANCIA_RENDER_MAPA then
+                            obj.Parent = nil
+                            task.spawn(function()
+                                while meuChar and meuChar.Parent and meuRoot and meuRoot.Parent and (meuRoot.Position - basePart.Position).Magnitude > DISTANCIA_RENDER_MAPA do
+                                    task.wait(2)
+                                end
+                                obj.Parent = Workspace
+                            end)
                         end
                     end
                 end
-                task.wait(INTERVALO_LOOP)
             end
-        end)
+        end
     end
-
-    if player.Character then IniciarLoopESP(player.Character) end
-    conexaoCharacter = player.CharacterAdded:Connect(IniciarLoopESP)
-    
-    conexaoTime = player:GetPropertyChangedSignal("Team"):Connect(function()
-        local char = player.Character
-        local head = char and char:FindFirstChild("Head")
-        local tag = head and head:FindFirstChild("C3_Tag")
-        local label = tag and tag:FindFirstChild("Texto")
-        
-        if label then
-            local corTime, tipo = ObterEquipe(player)
-            label.TextColor3 = corTime
-            label.Text = string.format("%s\n%s", player.Name, tipo)
-        end
-    end)
-    
-    player.AncestryChanged:Connect(function()
-        if not player.Parent then
-            if conexaoCharacter then conexaoCharacter:Disconnect() end
-            if conexaoTime then conexaoTime:Disconnect() end
-        end
-    end)
-end
-
-LocalPlayer:GetPropertyChangedSignal("Team"):Connect(function()
-    if LocalPlayer.Character then AplicarVelocidade(LocalPlayer.Character) end
 end)
 
-for _, p in ipairs(Players:GetPlayers()) do MonitorarJogador(p) end
-Players.PlayerAdded:Connect(MonitorarJogador)
+-- 5. TRATAMENTO DA ÁGUA DO MAR E LIXO REPETITIVO (DEBRIS)
+if Terrain then
+    Terrain.WaterWaveSize = 0
+    Terrain.WaterWaveSpeed = 0
+    Terrain.WaterReflectance = 0
+    Terrain.WaterTransparency = 1
+end
 
-print("[Sucesso] ESP Otimizado Atualizado!")
+task.spawn(function()
+    while task.wait(5) do
+        if Workspace:FindFirstChild("Debris") then
+            Workspace.Debris:ClearAllChildren()
+        end
+    end
+end)
+
+print("[MASTER SCRIPT] Tudo o que há de melhor em otimização foi ativado!")
