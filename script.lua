@@ -1,4 +1,4 @@
--- OTIMIZAÇÃO SUPREMA DEFINITIVA V3 (MÁXIMO FPS / REALME C3 / BLOX FRUITS)
+-- OTIMIZAÇÃO SUPREMA + MODO ESCONDE-ESCONDE (MÁXIMO FPS / OCULTAR TAG)
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local Workspace = game:GetService("Workspace")
@@ -7,38 +7,46 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- CONFIGURAÇÕES MÁXIMAS DE PERFORMANCE
+-- CONFIGURAÇÕES DE DESEMPENHO E JOGO
 local VELOCIDADE_DISCRETA = 20
-local DISTANCIA_RENDER_MAPA = 250 -- Reduzido para dar ainda mais FPS no Helio G70
+local DISTANCIA_RENDER_MAPA = 250 
 
--- Gerenciador leve de movimentação
-local function AplicarVelocidade(char)
+-- 1. MODO ESCONDER: OCULTA O SEU NOME E VIDA PARA OS OUTROS NÃO TE ACHAREM
+local function OcultarIdentidade(char)
     if not char then return end
     local humanoid = char:WaitForChild("Humanoid", 5)
     if humanoid then
         humanoid.WalkSpeed = VELOCIDADE_DISCRETA
+        -- Deixa o nome e a barra de vida invisíveis para quem está procurando
+        humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+        humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
     end
 end
 
-if LocalPlayer.Character then AplicarVelocidade(LocalPlayer.Character) end
-LocalPlayer.CharacterAdded:Connect(AplicarVelocidade)
+if LocalPlayer.Character then OcultarIdentidade(LocalPlayer.Character) end
+LocalPlayer.CharacterAdded:Connect(OcultarIdentidade)
 
 task.spawn(function()
     while task.wait(1.5) do
         if LocalPlayer.Character then
             local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid and humanoid.WalkSpeed ~= VELOCIDADE_DISCRETA then
-                humanoid.WalkSpeed = VELOCIDADE_DISCRETA
+            if humanoid then
+                if humanoid.WalkSpeed ~= VELOCIDADE_DISCRETA then
+                    humanoid.WalkSpeed = VELOCIDADE_DISCRETA
+                end
+                if humanoid.DisplayDistanceType ~= Enum.HumanoidDisplayDistanceType.None then
+                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                end
             end
         end
     end
 end)
 
--- 1. FORÇAR CONFIGURAÇÃO GRÁFICA INTERNA AO MÍNIMO
+-- 2. FORÇAR CONFIGURAÇÃO GRÁFICA INTERNA AO MÍNIMO
 settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 setfpscap(120)
 
--- 2. LIMPEZA TOTAL DE TEXTURAS, ANIMAÇÕES E EFEITOS DE SKILLS
+-- 3. LIMPEZA TOTAL DE TEXTURAS (MAPA LISO PARA MELHOR CAMUFLAGEM)
 local function OtimizarObjeto(obj)
     if obj:IsA("Texture") or obj:IsA("Decal") or obj:IsA("Sky") then
         obj:Destroy()
@@ -58,7 +66,7 @@ end
 for _, obj in ipairs(Workspace:GetDescendants()) do pcall(OtimizarObjeto) end
 Workspace.DescendantAdded:Connect(function(obj) pcall(OtimizarObjeto) end)
 
--- 3. DESTRUTOR DE SOMBRAS, NEBLINA E LIXO DA CÂMERA
+-- 4. DESTRUTOR DE SOMBRAS E ILUMINAÇÃO (EVITA QUE SUA SOMBRA TE DENUNCIE)
 local function LimparFiltrosEBugs()
     if Lighting then
         Lighting.GlobalShadows = false
@@ -84,7 +92,7 @@ task.spawn(function()
     while task.wait(0.5) do LimparFiltrosEBugs() end
 end)
 
--- 4. RENDERIZADOR DINÂMICO DE MAPA (SISTEMA INTELIGENTE DE ANTILAG)
+-- 5. RENDERIZADOR DINÂMICO DE MAPA
 task.spawn(function()
     while task.wait(2) do
         local meuChar = LocalPlayer.Character
@@ -92,7 +100,7 @@ task.spawn(function()
         
         if meuRoot then
             for _, obj in ipairs(Workspace:GetChildren()) do
-                if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) and obj.Name ~= LocalPlayer.Name and obj.Name ~= "Nevermore" then
+                if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) and obj.Name ~= LocalPlayer.Name then
                     local basePart = obj:FindFirstChildOfClass("BasePart") or obj:FindFirstChildWhichIsA("BasePart", true)
                     if basePart then
                         local distancia = (meuRoot.Position - basePart.Position).Magnitude
@@ -112,7 +120,7 @@ task.spawn(function()
     end
 end)
 
--- 5. TRATAMENTO DA ÁGUA DO MAR E LIXO REPETITIVO (DEBRIS)
+-- 6. REMOÇÃO DE EFEITOS DE ÁGUA E RASTROS
 if Terrain then
     Terrain.WaterWaveSize = 0
     Terrain.WaterWaveSpeed = 0
@@ -128,4 +136,4 @@ task.spawn(function()
     end
 end)
 
-print("[MASTER SCRIPT] Tudo o que há de melhor em otimização foi ativado!")
+print("[Esconde-Esconde] Script ativado! Nome ocultado e FPS no máximo.")
